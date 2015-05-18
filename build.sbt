@@ -22,3 +22,7 @@ libraryDependencies ++= Seq(
   jdbc,
   anorm
 )
+
+includeFilter in (Assets, LessKeys.less) := "*.less"
+excludeFilter in (Assets, LessKeys.less) := "_*.less"
+//添加文件过滤功能，来筛选sbt要处理的文件．
