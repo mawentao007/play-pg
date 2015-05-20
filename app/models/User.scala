@@ -13,9 +13,10 @@ object User {
   // -- Parsers
 
   // access "orders" database instead of "default"
-  //DB.withConnection("orders") { conn =>
-  // do whatever you need with the connection
-  //}
+    /*  DB.withConnection("orders") { conn =>
+         do whatever you need with the connection
+      }*/
+  //默认参数是default,可以自己加数据源
   /**
    * Parse a User from a ResultSet
    */
@@ -32,12 +33,16 @@ object User {
   //withConnection默认是去找default配置的连接。
   /**
    * Retrieve a User from email.
+   * 括号中可以视为一个函数,参数是connection,如果不加implicit,函数其实是正确的,但是因为as部分需要一个
+   * implicit的connection作为参数,因此需要声明connection为implicit给它用
+   * 比较晦涩,不过还是很有意思.
    */
   def findByEmail(email: String): Option[User] = {
     DB.withConnection { implicit connection =>
       SQL("select * from users where email = {email}").on(
         'email -> email
-      ).as(User.simple.singleOpt)
+      ).executeQuery().as(User.simple.singleOpt)
+
     }
   }
   
@@ -46,7 +51,7 @@ object User {
    */
   def findAll: Seq[User] = {
     DB.withConnection { implicit connection =>
-      SQL("select * from users").as(User.simple *)
+      SQL("select * from users").as(User.simple *)  //as这个函数需要connection作为隐含参数,因此需要在connection前面加implicit
     }
   }
   
