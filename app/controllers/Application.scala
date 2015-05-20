@@ -13,10 +13,11 @@ object Application extends Controller {
   // -- Authentication
 
   val loginForm = Form(
-    tuple(
+    tuple(                           //tuple 创建一个Mapping，verifying在这个Mapping的基础上加上点对点的限制条件和错误消息
       "email" -> text,
       "password" -> text
-    ) verifying ("Invalid email or password", result => result match {
+    )
+      verifying ("Invalid email or password", result => result match {         //两路数据绑定的构造函数
       case (email, password) => User.authenticate(email, password).isDefined
     })
   )
@@ -32,8 +33,8 @@ object Application extends Controller {
    * Handle login form submission.
    */
   def authenticate = Action { implicit request =>
-    loginForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.login(formWithErrors)),
+    loginForm.bindFromRequest.fold(    //将数据与表格进行绑定，通过验证则不会返回错误消息
+      formWithErrors => BadRequest(html.login(formWithErrors)),   //表格验证失败
       user => Redirect(routes.Projects.index).withSession("email" -> user._1)
     )
   }
@@ -71,6 +72,8 @@ trait Secured {
   
   /**
    * Retrieve the connected user email.
+   * session保存在服务器端，cookie之中有session id，可以访问服务器session。
+   * 这里查看请求的session id，如果确实存在，则返回，否则重定向到登陆页面。
    */
   private def username(request: RequestHeader) = request.session.get("email")
 
@@ -83,6 +86,10 @@ trait Secured {
   
   /** 
    * Action for authenticated users.
+   * 这是一个按参数传递的例子，没有先把结果算出来而是先传进去再算，因为这是安全模块。
+   * Security.Authenticated :Wraps another action, allowing only authenticated HTTP requests.包裹另一个请求，
+   * 只有通过验证的才能继续
+   * f 是一个curried function，两个参数一个结果
    */
   def IsAuthenticated(f: => String => Request[AnyContent] => Result) = Security.Authenticated(username, onUnauthorized) { user =>
     Action(request => f(user)(request))

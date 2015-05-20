@@ -11,7 +11,11 @@ case class User(email: String, name: String, password: String)
 object User {
 //  object Country extends Magic[Country](Some("Countries"))
   // -- Parsers
-  
+
+  // access "orders" database instead of "default"
+  //DB.withConnection("orders") { conn =>
+  // do whatever you need with the connection
+  //}
   /**
    * Parse a User from a ResultSet
    */
@@ -24,7 +28,8 @@ object User {
   }
   
   // -- Queries
-  
+  //withConnection 会自动关闭连接
+  //withConnection默认是去找default配置的连接。
   /**
    * Retrieve a User from email.
    */
